@@ -10,4 +10,8 @@ public class OutputView {
     public void printMessageLn(MessageConstants messageConstants) {
         System.out.println(messageConstants.getMessage());
     }
+
+    public void printMessageLn(String message) {
+        System.out.println(message);
+    }
 }
