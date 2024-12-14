@@ -18,4 +18,8 @@ public class Parser {
     public static Tuple dtoToTuple(TupleDto dto) {
         return new Tuple(dto.getName(), dto.getDate(), dto.getTime());
     }
+
+    public static String intToDate(int year, int month, int day) {
+        return String.format("%04d-%02d-%02d", year, month, day);
+    }
 }

@@ -49,7 +49,7 @@ public class AttendanceController {
     private void inputLoop() throws Exception {
         while (true) {
             try {
-                String response = inputView.getString(MessageConstants.START_GUIDE);
+                String response = getResponse();
                 if (Objects.equals(response, QUIT_MARK)) {
                     break;
                 }
@@ -59,6 +59,13 @@ public class AttendanceController {
                 handleInputException(exception);
             }
         }
+    }
+
+    private String getResponse() throws Exception {
+        String[] today = attendanceService.getToday().split("-");
+        return inputView.getString(
+                String.format(MessageConstants.START_GUIDE.getMessage(), today[1], today[2],
+                        attendanceService.getWeek(attendanceService.getToday())));
     }
 
     private void handleRequest(String response) throws Exception {
@@ -81,8 +88,8 @@ public class AttendanceController {
         throw ExceptionConstants.INVALID_FORMAT.getException();
     }
 
-    private String getNickname() throws Exception {
-        String name = inputView.getString(MessageConstants.INPUT_NICKNAME_GUIDE);
+    private String getNickname(MessageConstants messageConstants) throws Exception {
+        String name = inputView.getString(messageConstants);
         if (attendanceRepository.findAll(name) == null) {
             throw ExceptionConstants.NICKNAME_NOT_FOUND.getException();
         }
@@ -92,25 +99,59 @@ public class AttendanceController {
         return name;
     }
 
-    private int getInputTime() throws Exception {
-        String time = inputView.getString(MessageConstants.INPUT_TIME_GUIDE);
+    private int getTime(MessageConstants messageConstants) throws Exception {
+        String time = inputView.getString(messageConstants);
         Validator.checkTime(time);
         return Parser.StringToTime(time);
     }
 
-    private void attendanceCheck() throws Exception {
-        String name = getNickname();
-        int time = getInputTime();
-        Tuple extra = new Tuple(name, attendanceService.getToday(), time);
-        attendanceRepository.add(extra);
+    private int getDay(MessageConstants messageConstants) {
+        int day = inputView.getInt(messageConstants);
+        return day;
+    }
+
+    private void printAttendance(Tuple target, int time) {
         outputView.newLine();
-        AttendanceStatus status = AttendanceStatus.distinguish(attendanceService.getStartTime(extra.getDate()), time);
-        outputView.printAttendance(extra, attendanceService.getWeek(extra.getDate()), status);
+        AttendanceStatus status = AttendanceStatus.distinguish(attendanceService.getStartTime(target.getDate()), time);
+        outputView.printAttendance(target, attendanceService.getWeek(target.getDate()), status);
         outputView.newLine();
     }
 
-    private void attendanceModify() {
+    private void printAttendanceChange(Tuple target1, int time1, Tuple target2, int time2) {
+        outputView.newLine();
+        AttendanceStatus status1 = AttendanceStatus.distinguish(attendanceService.getStartTime(target1.getDate()),
+                time1);
+        outputView.printAttendanceWithNoIndent(target1, attendanceService.getWeek(target1.getDate()), status1);
+        outputView.printMessage(MessageConstants.OUTPUT_MODIFY_MARK);
+        AttendanceStatus status2 = AttendanceStatus.distinguish(attendanceService.getStartTime(target2.getDate()),
+                time2);
+        outputView.printAttendanceWithNoIndent(target2, attendanceService.getWeek(target2.getDate()), status2);
+        outputView.newLine();
+        outputView.newLine();
+    }
 
+    private void attendanceCheck() throws Exception {
+        String name = getNickname(MessageConstants.INPUT_NICKNAME_GUIDE);
+        int time = getTime(MessageConstants.INPUT_TIME_GUIDE);
+        Tuple extra = new Tuple(name, attendanceService.getToday(), time);
+        attendanceRepository.add(extra);
+        printAttendance(extra, time);
+    }
+
+    private void attendanceModify() throws Exception {
+        String name = getNickname(MessageConstants.INPUT_MODIFY_NICKNAME_GUIDE);
+        String day = Parser.intToDate(2024, 12, getDay(MessageConstants.INPUT_MODIFY_DATE_GUIDE));
+        int time = getTime(MessageConstants.INPUT_MODIFY_TIME_GUIDE);
+        Tuple modify = new Tuple(name, day, time);
+        Tuple exist = attendanceRepository.findOne(name, day);
+        Tuple legacy = new Tuple(exist.getName(), exist.getDate(), exist.getTime());
+        if (exist == null) {
+            attendanceRepository.add(modify);
+            printAttendanceChange(attendanceService.getTrashTuple(modify), -1, modify, time);
+            return;
+        }
+        attendanceRepository.modify(modify);
+        printAttendanceChange(legacy, legacy.getTime(), modify, time);
     }
 
     private void memberAttendanceCheck() {

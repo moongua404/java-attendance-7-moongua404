@@ -16,10 +16,10 @@ public enum AttendanceStatus {
     }
 
     public static AttendanceStatus distinguish(int startTime, int currentTime) {
-        if (currentTime - startTime <= 0) {
+        if (currentTime - startTime <= 5) {
             return ATTEND;
         }
-        if (currentTime - startTime < 5) {
+        if (currentTime - startTime < 30) {
             return LATE;
         }
         return ABSENT;

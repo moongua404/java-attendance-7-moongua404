@@ -24,7 +24,16 @@ public class OutputView {
 
     public void printAttendance(Tuple tuple, char weekDay, AttendanceStatus status) {
         String[] date = tuple.getDate().split("-");
+        if (tuple.getTime() == -1) {
+            System.out.printf((MessageConstants.OUTPUT_ATTENDANCE_NULL.getMessage()) + "%n", date[1], date[2], weekDay);
+        }
         System.out.printf((MessageConstants.OUTPUT_ATTENDANCE_NORMAL.getMessage()) + "%n", date[1], date[2], weekDay,
+                Parser.timeToString(tuple.getTime()), status.getMessage());
+    }
+
+    public void printAttendanceWithNoIndent(Tuple tuple, char weekDay, AttendanceStatus status) {
+        String[] date = tuple.getDate().split("-");
+        System.out.printf((MessageConstants.OUTPUT_ATTENDANCE_NORMAL.getMessage()), date[1], date[2], weekDay,
                 Parser.timeToString(tuple.getTime()), status.getMessage());
     }
 }

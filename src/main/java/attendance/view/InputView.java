@@ -9,6 +9,11 @@ public class InputView {
         return Console.readLine();
     }
 
+    public String getString(String message) {
+        System.out.println(message);
+        return Console.readLine();
+    }
+
     public int getInt(MessageConstants messageConstants) {
         System.out.println(messageConstants.getMessage());
         return Integer.parseInt(Console.readLine());

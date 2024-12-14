@@ -1,5 +1,6 @@
 package attendance.service;
 
+import attendance.model.Tuple;
 import attendance.model.TupleDto;
 import attendance.utils.ExceptionConstants;
 import attendance.utils.Parser;
@@ -80,5 +81,9 @@ public class AttendanceService {
             return 13 * 60;
         }
         return 10 * 60;
+    }
+
+    public Tuple getTrashTuple(Tuple tuple) {
+        return new Tuple(tuple.getName(), tuple.getDate(), -1);
     }
 }
