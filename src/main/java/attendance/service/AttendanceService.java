@@ -86,4 +86,11 @@ public class AttendanceService {
     public Tuple getTrashTuple(Tuple tuple) {
         return new Tuple(tuple.getName(), tuple.getDate(), -1);
     }
+
+    public boolean isHoliday(int a) {
+        if ((a % 7 == 1) || (a % 7 == 0) || (a == 25)) {
+            return true;
+        }
+        return false;
+    }
 }

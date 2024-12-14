@@ -36,4 +36,13 @@ public class OutputView {
         System.out.printf((MessageConstants.OUTPUT_ATTENDANCE_NORMAL.getMessage()), date[1], date[2], weekDay,
                 Parser.timeToString(tuple.getTime()), status.getMessage());
     }
+
+    public void printPersonal(Tuple tuple, char weekDay, AttendanceStatus status) {
+        String[] date = tuple.getDate().split("-");
+        if (tuple.getTime() == -1) {
+            System.out.printf("12월 %s일 %c요일 --:-- (결석)\n", date[2], weekDay);
+        }
+        System.out.printf("12월 %s일 %c요일 %02d:%02d (%s)\n", date[2], weekDay, tuple.getTime() / 60,
+                tuple.getTime() % 60, status.getMessage());
+    }
 }

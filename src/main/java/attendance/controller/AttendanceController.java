@@ -154,8 +154,64 @@ public class AttendanceController {
         printAttendanceChange(legacy, legacy.getTime(), modify, time);
     }
 
-    private void memberAttendanceCheck() {
+    private void memberAttendanceCheck() throws Exception {
+        String name = getNickname(MessageConstants.INPUT_NICKNAME_GUIDE);
+        outputView.printMessageLn(String.format(MessageConstants.OUTPUT_ATTENDANCE_MESSAGE.getMessage(), name));
+        outputView.newLine();
+        List<Tuple> data = attendanceRepository.findAll(name);
+        String todayDate = attendanceService.getToday();
 
+        int skiped = 0;
+
+        int today = Integer.parseInt(attendanceService.getToday().split("-")[2]);
+        for (int i = 1; i < today; i++) {
+            if (!attendanceService.isHoliday(i)) {
+                String tar = String.format("2024-12-%02d", i);
+                Tuple find = data.stream().filter(d -> Objects.equals(d.getDate(), tar)).findFirst()
+                        .orElse(null);
+                if (find != null) {
+                    outputView.printPersonal(find, attendanceService.getWeek(find.getDate()),
+                            AttendanceStatus.distinguish(attendanceService.getStartTime(find.getDate()),
+                                    find.getTime()));
+                    continue;
+                }
+                skiped++;
+                Tuple legacy = new Tuple(name, String.format("2024-12-%02d", i), -1);
+                outputView.printPersonal(legacy, attendanceService.getWeek(legacy.getDate()),
+                        AttendanceStatus.distinguish(attendanceService.getStartTime(legacy.getDate()),
+                                legacy.getTime()));
+            }
+        }
+
+        int ate = (int) data.stream()
+                .filter(d -> AttendanceStatus.distinguish(attendanceService.getStartTime(d.getDate()), d.getTime())
+                        == AttendanceStatus.ATTEND).count();
+        int lat = (int) data.stream()
+                .filter(d -> AttendanceStatus.distinguish(attendanceService.getStartTime(d.getDate()), d.getTime())
+                        == AttendanceStatus.LATE).count();
+        int abs = (int) data.stream()
+                .filter(d -> AttendanceStatus.distinguish(attendanceService.getStartTime(d.getDate()), d.getTime())
+                        == AttendanceStatus.ABSENT).count();
+        abs += skiped;
+        
+        System.out.println();
+        System.out.printf("출석 : %d%n", ate);
+        System.out.printf("지각 : %d%n", lat);
+        System.out.printf("결석 : %d%n", abs);
+        System.out.println();
+
+        if (lat / 3 + abs >= 5) {
+            System.out.println("제적 대상자입니다. ");
+            return;
+        }
+        if (lat / 3 + abs >= 3) {
+            System.out.println("면담 대상자입니다. ");
+            return;
+        }
+        if (lat / 3 + abs >= 2) {
+            System.out.println("경고 대상자입니다. ");
+            return;
+        }
     }
 
     private void dangerousMemberCheck() {
