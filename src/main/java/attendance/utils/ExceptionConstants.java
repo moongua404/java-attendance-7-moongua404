@@ -1,7 +1,10 @@
 package attendance.utils;
 
+import java.io.IOException;
+
 public enum ExceptionConstants {
     INVALID_INPUT(IllegalArgumentException.class, "올바르지 않은 형식으로 입력했습니다. 다시 입력해 주세요."),
+    INVALID_FILE_IO(IOException.class, "파일 입출력 과정에서 문제가 생겼습니다."),
     EMPTY_INPUT(UnsupportedOperationException.class, "빈 값이 입력되어 프로그램의 안정성을 위해 종료합니다.");
 
     private final Class<? extends Exception> exception;
