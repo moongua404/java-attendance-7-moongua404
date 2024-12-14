@@ -11,6 +11,10 @@ public class Parser {
         return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
     }
 
+    public static String timeToString(int time) {
+        return String.format("%02d:%02d", time / 60, time % 60);
+    }
+
     public static Tuple dtoToTuple(TupleDto dto) {
         return new Tuple(dto.getName(), dto.getDate(), dto.getTime());
     }

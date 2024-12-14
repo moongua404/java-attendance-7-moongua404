@@ -3,9 +3,11 @@ package attendance.service;
 import attendance.model.TupleDto;
 import attendance.utils.ExceptionConstants;
 import attendance.utils.Parser;
+import camp.nextstep.edu.missionutils.DateTimes;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +27,14 @@ public class AttendanceService {
                 .collect(Collectors.toList());
     }
 
+    public String getToday() throws Exception {
+        try {
+            return DateTimes.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        } catch (Exception e) {
+            throw ExceptionConstants.INVALID_FORMAT.getException();
+        }
+    }
+
     private List<String> splitLine(String bundle) {
         return Arrays.stream(bundle.split(LINE_DELIMITER)).toList();
     }
@@ -42,25 +52,33 @@ public class AttendanceService {
         }
     }
 
-    /*
-    private String getFileData(String path) throws Exception {
-        try {
-            File csv = new File(path);
-            return readAllLine(csv);
-        } catch (Exception exception) {
-            throw ExceptionConstants.INVALID_FILE_IO.getException();
+    public char getWeek(String date) {
+        int target = Integer.parseInt(date.split("-")[2]);
+        if (target % 7 == 1) {
+            return '일';
         }
+        if (target % 7 == 2) {
+            return '월';
+        }
+        if (target % 7 == 3) {
+            return '화';
+        }
+        if (target % 7 == 4) {
+            return '수';
+        }
+        if (target % 7 == 5) {
+            return '목';
+        }
+        if (target % 7 == 6) {
+            return '금';
+        }
+        return '토';
     }
 
-    private String readAllLine(File file) throws Exception {
-        BufferedReader br = null;
-        StringBuilder data = new StringBuilder();
-        br = new BufferedReader(new FileReader(file));
-        String line = br.readLine();
-        while ((line = br.readLine()) != null) {
-            data.append(line + "\n");
+    public int getStartTime(String date) {
+        if (getWeek(date) == '월') {
+            return 13 * 60;
         }
-        return data.toString();
+        return 10 * 60;
     }
-     */
 }
